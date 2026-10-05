@@ -1,1 +1,1 @@
-document.write("<script src='../buyoff-offer-letter.js'></script>");
+document.write("<script src='buyoff-offer-letter.js'></script>");

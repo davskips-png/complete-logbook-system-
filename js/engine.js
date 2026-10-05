@@ -1,1 +1,1 @@
-document.write("<script src='../engine.js'></script>");
+document.write("<script src='engine.js'></script>");

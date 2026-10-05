@@ -1,1 +1,1 @@
-document.write("<script src='../ledger.js'></script>");
+document.write("<script src='ledger.js'></script>");

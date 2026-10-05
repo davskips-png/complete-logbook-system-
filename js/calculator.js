@@ -1,1 +1,1 @@
-document.write("<script src='../calculator.js'></script>");
+document.write("<script src='calculator.js'></script>");

@@ -1,1 +1,1 @@
-document.write("<script src='../data.js'></script>");
+document.write("<script src='data.js'></script>");

@@ -1,1 +1,1 @@
-document.write("<script src='../lms.js'></script>");
+document.write("<script src='lms.js'></script>");
