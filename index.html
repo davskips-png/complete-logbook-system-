@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spectrum Credit Limited — Core LMS & Loan Origination System (LOS)</title>
+  <meta name="description" content="Core Banking & Loan Management System (LMS) and Loan Origination System (LOS) for Logbook Asset Financing in Kenya.">
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  
+  <!-- Chart.js for Financial Intelligence -->
+  <!-- Pin this dependency to a reviewed version and add an SRI hash before production deployment. -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4"></script>
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="css/app.css">
+
+  <style>
+    .auth-shell {
+      display: flex;
+      min-height: 100vh;
+      align-items: stretch;
+      background: #fff;
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    }
+
+    .auth-page {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    .brand-panel {
+      position: relative;
+      background:
+        linear-gradient(rgba(17, 31, 87, 0.72), rgba(17, 31, 87, 0.72)),
+        url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat,
+        #0d1f5d;
+      color: #fff;
+      padding: 50px 72px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .brand-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(13, 31, 93, 0.14), rgba(13, 31, 93, 0.44));
+      pointer-events: none;
+    }
+
+    .brand-panel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-logo-card {
+      width: min(100%, 330px);
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 16px;
+      padding: 18px 18px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 40px auto;
+      box-shadow: 0 20px 40px rgba(9, 12, 30, 0.18);
+    }
+
+    .brand-panel h2 {
+      font-size: clamp(28px, 2.5vw, 42px);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin: 0 0 12px;
+      color: #fff;
+    }
+
+    .brand-panel p {
+      font-size: clamp(15px, 1.1vw, 18px);
+      line-height: 1.55;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.92);
+      max-width: 32ch;
+      margin: 0;
+    }
+
+    .auth-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f3f5f7;
+      padding: 48px 32px;
+    }
+
+    .auth-form-wrap {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .auth-view {
+      display: block;
+    }
+
+    .auth-view.hidden {
+      display: none;
+    }
+
+    .auth-view h1 {
+      font-size: clamp(30px, 2vw, 42px);
+      font-weight: 700;
+      color: #12195f;
+      letter-spacing: -0.02em;
+      margin: 0 0 10px;
+    }
+
+    .auth-subtitle {
+      font-size: 15px;
+      color: #6b7280;
+      margin: 0 0 28px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .field.invalid input {
+      border-color: #c8503f;
+      box-shadow: 0 0 0 3px rgba(200, 80, 63, 0.16);
+    }
+
+    .field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+
+    .req {
+      color: #c0392b;
+      margin-left: 2px;
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .inline-link {
+      background: transparent;
+      border: none;
+      color: #2563eb;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap input,
+    .field input {
+      width: 100%;
+      height: 44px;
+      padding: 0 44px 0 14px;
+      font: inherit;
+      font-size: 15px;
+      color: #0f1a3d;
+      background: #fff;
+      border: 1px solid #d9dde5;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    .password-wrap input:focus,
+    .field input:focus {
+      border-color: #3b78e7;
+      box-shadow: 0 0 0 3px rgba(59, 120, 231, 0.18);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 18px;
+      color: #374151;
+    }
+
+    .error-text {
+      display: none;
+      margin-top: 6px;
+      font-size: 13px;
+      color: #c0392b;
+    }
+
+    .field.invalid .error-text,
+    .field.invalid + .error-text,
+    .field.invalid p.error-text {
+      display: block;
+    }
+
+    .auth-alert {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      margin-top: 16px;
+      border-radius: 8px;
+      background: #fce8e6;
+      border: 1px solid #efb5ad;
+      color: #b42318;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .auth-alert.hidden {
+      display: none;
+    }
+
+    .auth-alert-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #d92d20;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .auth-submit {
+      width: 100%;
+      height: 46px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #3b78e7, #2f66cc);
+      color: #fff;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 18px rgba(59, 120, 231, 0.22);
+    }
+
+    .auth-submit:hover {
+      background: linear-gradient(180deg, #2f66cc, #2457af);
+    }
+
+    .back-link {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-top: 14px;
+      background: transparent;
+      border: none;
+      color: #2563eb;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 500;
+    }
+
+    @media (max-width: 860px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .brand-panel { display: none; }
+      .auth-panel { min-height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+  <div id="auth-shell" class="auth-shell" style="display: none;">
+    <div class="auth-page">
+      <aside class="brand-panel">
+        <div class="brand-logo-card">
+          <svg viewBox="0 0 320 130" width="100%" role="img" aria-label="Spectrum Credit Limited">
+            <path d="M142 38 L176 8 L168 30 Z" fill="#e8792b"/>
+            <text x="160" y="82" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+                  font-style="italic" font-weight="800" font-size="62" fill="#12195f" letter-spacing="-2">Spectrum</text>
+            <line x1="6" y1="95" x2="62" y2="95" stroke="#e8792b" stroke-width="2.5"/>
+            <line x1="258" y1="95" x2="314" y2="95" stroke="#e8792b" stroke-width="2.5"/>
+            <text x="160" y="102" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+                  font-weight="700" font-size="19" fill="#e8792b" letter-spacing="1">CREDIT LIMITED</text>
+            <text x="160" y="124" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+                  font-size="17" fill="#12195f">We Don't Just Lend. We Empower.</text>
+          </svg>
+        </div>
+        <h2>Secure. Transparent. Reliable.</h2>
+        <p>Spectrum Credit Limited portal — Logbook Asset Finance Core Banking Platform</p>
+      </aside>
+
+      <section class="auth-panel">
+        <div class="auth-form-wrap">
+          <div id="login-view" class="auth-view">
+            <h1>Welcome Back</h1>
+            <p class="auth-subtitle">Please sign in to your account</p>
+
+            <form id="login-form" novalidate autocomplete="off">
+              <div class="field" id="login-email-field">
+                <label for="login-email">Email Address<span class="req">*</span></label>
+                <input id="login-email" type="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="you@example.com" />
+                <p class="error-text" id="login-email-error">Email is required</p>
+              </div>
+
+              <div class="field" id="login-password-field">
+                <div class="label-row">
+                  <label for="login-password">Password<span class="req">*</span></label>
+                  <button type="button" class="inline-link" id="show-forgot">Forgot password?</button>
+                </div>
+                <div class="password-wrap">
+                  <input id="login-password" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Enter your password" />
+                  <button type="button" class="toggle-password" id="toggle-password" aria-label="Show password">👁</button>
+                </div>
+                <p class="error-text" id="login-password-error">Password is required</p>
+              </div>
+
+              <button class="auth-submit" type="submit" id="auth-submit">Sign In</button>
+              <div id="login-auth-alert" class="auth-alert hidden" role="alert" aria-live="polite">
+                <span class="auth-alert-icon">×</span>
+                <span>Invalid credentials</span>
+              </div>
+            </form>
+          </div>
+
+          <div id="forgot-view" class="auth-view hidden">
+            <h1>Reset Password</h1>
+            <p class="auth-subtitle">Enter your email address to receive a reset link.</p>
+
+            <form id="forgot-form" novalidate autocomplete="off">
+              <div class="field" id="forgot-email-field">
+                <label for="forgot-email">Email Address<span class="req">*</span></label>
+                <input id="forgot-email" type="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="you@example.com" />
+                <p class="error-text" id="forgot-email-error">Email is required</p>
+              </div>
+
+              <button class="auth-submit" type="submit" id="forgot-submit">Send Reset Link</button>
+              <button type="button" class="back-link" id="back-to-login">Back to Sign In</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="app-layout" style="display: none;">
+
+    <!-- Topbar Navigation -->
+    <header class="topbar">
+      <div class="brand-section">
+        <div class="brand-icon-box">
+          <i class="ti ti-shield-dollar"></i>
+        </div>
+        <div>
+          <div class="brand-logo">
+            Spectrum Credit
+            <span class="brand-badge">LMS · LOS</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--text-secondary)">Logbook Asset Finance Core Banking Platform</div>
+        </div>
+      </div>
+
+      <div class="search-wrapper no-print">
+        <i class="ti ti-search search-icon-pos"></i>
+        <input type="text" class="topbar-search" id="global-search-input" placeholder="Quick search loans, customers, vehicles (e.g. KDD, Mercy, Toyota)..." oninput="App.globalSearch(this.value)">
+        <div class="global-search-dropdown" id="global-search-results"></div>
+      </div>
+
+      <div class="topbar-controls">
+        <div class="datetime-bar no-print" title="System date & time">
+          <svg class="datetime-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span id="datetime-text"></span>
+        </div>
+
+        <div class="role-badge-box">
+          <i class="ti ti-user-check" style="color:var(--brand-accent);font-size:16px;"></i>
+          <span class="role-badge-label">Role: <span id="topbar-role-title" style="font-weight:600;color:var(--brand-accent)"></span></span>
+        </div>
+        <button class="btn-icon" style="position:relative;padding:6px 12px" onclick="App.showTab('notifications')">
+          <i class="ti ti-bell"></i>
+          <span id="noti-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#DC2626;color:white;border-radius:10px;font-size:9.5px;padding:1px 5px;font-weight:700"></span>
+        </button>
+        <button class="btn-icon" style="position:relative;padding:6px 12px" onclick="if (typeof App !== 'undefined' && App.logout) App.logout(); else handleLogout()" title="Sign out">
+          <i class="ti ti-logout"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sub Navigation Tabs Bar -->
+    <nav class="nav-subbar">
+      <div class="nav-tabs">
+        <button class="nav-tab-btn active" data-tab="dashboard" onclick="App.showTab('dashboard')">
+          <i class="ti ti-layout-dashboard"></i> Dashboard
+        </button>
+        <button class="nav-tab-btn" data-tab="applications" id="nav-applications" onclick="App.showTab('applications')">
+          <i class="ti ti-file-invoice"></i> LOS Pipeline
+          <span class="nav-tab-tag" id="tag-apps-count">0</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="loans" onclick="App.showTab('loans')">
+          <i class="ti ti-folders"></i> LMS Active Loans
+          <span class="nav-tab-tag" id="tag-loans-count">0</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="collections" id="nav-collections" onclick="App.showTab('collections')">
+          <i class="ti ti-alert-triangle"></i> Collections & Arrears
+          <span class="nav-tab-tag" id="tag-arrears-count" style="background:#FEE2E2;color:#DC2626">0</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="collateral" onclick="App.showTab('collateral')">
+          <i class="ti ti-building-warehouse"></i> Collateral & Safe Vault
+          <span class="nav-tab-tag" id="tag-release-count" style="background:#ECFDF5;color:#047857">0</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="ledger" id="nav-ledger" onclick="App.showTab('ledger')" title="Finance and Overall Admin">
+          <i class="ti ti-scale"></i> General Ledger
+        </button>
+        <button class="nav-tab-btn" data-tab="analytics" id="nav-analytics" onclick="App.showTab('analytics')" title="Finance, Collections and Overall Admin">
+          <i class="ti ti-chart-pie"></i> Analytics & PAR
+        </button>
+        <button class="nav-tab-btn" data-tab="products" id="nav-products" onclick="App.showTab('products')" title="Overall Admin only">
+          <i class="ti ti-settings-dollar"></i> Products & Policy
+        </button>
+        <button class="nav-tab-btn" data-tab="branches" id="nav-branches" onclick="App.showTab('branches')" title="Overall Admin and Super Admin only">
+          <i class="ti ti-building-community"></i> Branch Management
+        </button>
+        <button class="nav-tab-btn" data-tab="staff" id="nav-staff" onclick="App.showTab('staff')" title="Overall Admin and Super Admin only">
+          <i class="ti ti-users"></i> Staff Management
+        </button>
+        <button class="nav-tab-btn" data-tab="system-config" id="nav-system-config" onclick="App.showTab('system-config')" title="Super Admin only">
+          <i class="ti ti-settings"></i> System Configuration
+        </button>
+        <button class="nav-tab-btn" data-tab="audit-log" id="nav-audit-log" onclick="App.showTab('audit-log')" title="Super Admin only">
+          <i class="ti ti-history"></i> Audit Log
+        </button>
+        <button class="nav-tab-btn" data-tab="notifications" onclick="App.showTab('notifications')">
+          <i class="ti ti-bell-ringing"></i> Notifications
+        </button>
+        <button class="nav-tab-btn nav-clear-data-btn" id="nav-clear-data" onclick="App.clearCapturedData()" style="display:none" title="Remove captured LMS, LOS and calculator data">
+          <i class="ti ti-trash"></i> Clear Captured Data
+        </button>
+        <button class="nav-tab-btn nav-new-app-btn" id="nav-new-app" onclick="App.showTab('new-application')">
+          <i class="ti ti-plus"></i> New Application
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content Workspace -->
+    <main class="main-workspace">
+
+      <!-- ================================================================= -->
+      <!-- TAB: DASHBOARD                                                    -->
+      <!-- ================================================================= -->
+      <div id="tab-dashboard" class="tab-pane active dashboard-home">
+        <div class="dashboard-heading">
+          <div>
+            <div class="dashboard-kicker">Operations overview</div>
+            <h1>Operations overview</h1>
+            <p>Current loan book position and work awaiting attention.</p>
+          </div>
+          <div class="dashboard-date-note">Updated automatically</div>
+        </div>
+
+        <!-- KPI Metrics Grid -->
+        <div class="metrics-grid">
+          <div class="metric-card metric-card-portfolio">
+            <div class="metric-top">
+              <span class="metric-title">Active Loan Portfolio</span>
+              <div class="metric-icon" style="background:#EFF6FF;color:#0284C7"><i class="ti ti-coin"></i></div>
+            </div>
+            <div class="metric-value" id="metric-active-count">0</div>
+            <div class="metric-footer positive">Performing accounts</div>
+          </div>
+
+          <div class="metric-card metric-card-book">
+            <div class="metric-top">
+              <span class="metric-title">Total Loan Book</span>
+              <div class="metric-icon" style="background:#ECFDF5;color:#059669"><i class="ti ti-wallet"></i></div>
+            </div>
+            <div class="metric-value" id="metric-loan-book">KES 0</div>
+            <div class="metric-footer">Net principal outstanding</div>
+          </div>
+
+          <div class="metric-card metric-card-overdue">
+            <div class="metric-top">
+              <span class="metric-title">Delinquency / Overdue</span>
+              <div class="metric-icon" style="background:#FEF2F2;color:#DC2626"><i class="ti ti-alert-triangle"></i></div>
+            </div>
+            <div class="metric-value" id="metric-overdue-count" style="color:#DC2626">0</div>
+            <div class="metric-footer negative">Accounts in PAR 1-90+</div>
+          </div>
+
+          <div class="metric-card metric-card-pipeline" id="metric-pipeline-card">
+            <div class="metric-top">
+              <span class="metric-title" id="metric-pipeline-title">Origination Pipeline</span>
+              <div class="metric-icon" id="metric-pipeline-icon" style="background:#FAF5FF;color:#7C3AED"><i class="ti ti-file-text"></i></div>
+            </div>
+            <div class="metric-value" id="metric-pipeline-count">0</div>
+            <div class="metric-footer" id="metric-pipeline-footer">Pending underwriting</div>
+          </div>
+        </div>
+
+        <!-- 2-Column Dashboard Cards -->
+        <div class="dashboard-columns">
+          <div class="card" style="margin:0">
+            <div class="card-header">
+              <div class="card-title-group">
+                <i class="ti ti-list-check dashboard-section-icon"></i>
+                <span class="card-title">My Action Queue</span>
+              </div>
+              <span class="badge" style="background:#F1F5F9;color:var(--text-secondary)">Role: <span id="current-role-title">Branch Admin</span></span>
+            </div>
+            <div class="card-body" id="dash-my-queue">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <div class="card" style="margin:0">
+            <div class="card-header">
+              <div class="card-title-group">
+                <i class="ti ti-clock-history dashboard-section-icon"></i>
+                <span class="card-title">Recent Activity & Audit</span>
+              </div>
+            </div>
+            <div class="card-body" id="dash-recent-activity">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: LOS APPLICATIONS PIPELINE                                   -->
+      <!-- ================================================================= -->
+      <div id="tab-applications" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-title-group">
+                <span class="card-title">Loan Origination System (LOS) — Applications Pipeline</span>
+                <span class="badge" id="los-pipeline-count" style="background:#FAF5FF;color:#7C3AED">0 applications</span>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" id="apps-new-btn" onclick="App.showTab('new-application')">
+              <i class="ti ti-plus"></i> New Application
+            </button>
+          </div>
+          <div class="card-body">
+            <!-- Search & Filters -->
+            <div style="display:flex;gap:10px;margin-bottom:1rem">
+              <input type="text" id="app-search" placeholder="Search by customer name, application no, or registration…" 
+                style="flex:1;font-size:12.5px;padding:7px 11px;border:1px solid var(--border-medium);border-radius:var(--radius-md)" 
+                oninput="LOSModule.renderApplicationsTable()">
+              
+              <select id="status-filter" style="width:200px;font-size:12.5px;padding:7px 11px;border:1px solid var(--border-medium);border-radius:var(--radius-md)" 
+                onchange="LOSModule.renderApplicationsTable()">
+                <option value="">All Statuses</option>
+                <option value="SUBMITTED">Submitted</option>
+                <option value="RISK_REVIEW">Risk Review</option>
+                <option value="PENDING_APPROVAL">Pending Approval</option>
+                <option value="CONDITIONS_SET">Conditions Set</option>
+                <option value="CONDITIONS_UPLOADED">Conditions Uploaded</option>
+                <option value="CONDITIONS_MET">Conditions Met</option>
+                <option value="LOAN_BOOKING">Loan Booking</option>
+                <option value="FINAL_APPROVED">Final Approved</option>
+                <option value="VOUCHER_PREPARED">Voucher Prepared</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
+            </div>
+
+            <div id="apps-table-container">
+              <!-- Rendered by LOSModule -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: NEW APPLICATION WIZARD (5 STEPS)                            -->
+      <!-- ================================================================= -->
+      <div id="tab-new-application" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">New Logbook Asset Loan Application Intake Wizard</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn btn-sm" type="button" onclick="LOSModule.saveDraft()">
+                <i class="ti ti-device-floppy"></i> Save Draft
+              </button>
+              <button class="btn btn-sm" type="button" onclick="App.showTab('applications')">Cancel</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Wizard Step Track -->
+            <div class="stage-flow-track" style="margin-bottom:1.25rem">
+              <div class="stage-step active" id="step-tab-1" onclick="LOSModule.goStep(1)">1. Customer Profile</div>
+              <div class="stage-step pending" id="step-tab-2" onclick="LOSModule.goStep(2)">2. Loan Details</div>
+              <div class="stage-step pending" id="step-tab-3" onclick="LOSModule.goStep(3)">3. Collateral & LTV</div>
+              <div class="stage-step pending" id="step-tab-4" onclick="LOSModule.goStep(4)">4. KYC & Documents</div>
+              <div class="stage-step pending" id="step-tab-5" onclick="LOSModule.goStep(5)">5. Risk Scoring & Submit</div>
+            </div>
+
+            <!-- Step 1: Customer Profile -->
+            <div id="step-1">
+              <div class="section-label" style="margin-top:0">Customer Entity Type</div>
+              <div style="display:flex;gap:16px;margin-bottom:1rem">
+                <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer">
+                  <input type="radio" name="cust-type" value="INDIVIDUAL" checked onchange="LOSModule.toggleBizFields()"> Individual / Salaried / Sole Trader
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer">
+                  <input type="radio" name="cust-type" value="BUSINESS" onchange="LOSModule.toggleBizFields()"> Registered Business / Corporate Entity
+                </label>
+              </div>
+
+              <div class="section-label">Identity & Contact Information</div>
+              <div class="form-grid">
+                <div class="fg"><label>Full Name / Principal Borrower</label><input id="n-name" placeholder="e.g. John Mwangi Kamau"></div>
+                <div class="fg"><label>National ID / Passport Number</label><input id="n-id" placeholder="e.g. 28491823"></div>
+                <div class="fg"><label>KRA PIN</label><input id="n-kra" placeholder="e.g. A009847162K"></div>
+                <div class="fg"><label>Mobile Phone Number (M-Pesa registered)</label><input id="n-phone" placeholder="e.g. +254 712 345 678"></div>
+                <div class="fg"><label>Postal Address</label><input id="n-address" placeholder="e.g. P.O. Box 860-50428"></div>
+                <div class="fg"><label>Town / City</label><input id="n-town" placeholder="e.g. Mombasa"></div>
+                <div class="fg" style="grid-column:1/-1"><label>Email Address</label><input id="n-email" type="email" placeholder="e.g. jmwangi@gmail.com"></div>
+              </div>
+
+              <div id="biz-fields" style="display:none">
+                <div class="section-label">Corporate Entity Credentials</div>
+                <div class="form-grid">
+                  <div class="fg"><label>Registered Company Name</label><input id="n-biz" placeholder="e.g. Kamau Logistics Ltd"></div>
+                  <div class="fg"><label>CR12 Number</label><input id="n-cr12" placeholder="e.g. CR12-994827"></div>
+                  <div class="fg"><label>Certificate of Incorporation / Reg</label><input id="n-cert" placeholder="e.g. CPR/2019/9921"></div>
+                  <div class="fg"><label>Single Business Permit / License</label><input id="n-bl" placeholder="e.g. SBP-NAI-2025-1029"></div>
+                </div>
+              </div>
+
+              <div style="display:flex;justify-content:flex-end;margin-top:1.25rem">
+                <button class="btn btn-primary" onclick="LOSModule.goStep(2)">
+                  Next: Loan Details <i class="ti ti-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Loan Details & Buyoff -->
+            <div id="step-2" style="display:none">
+              <div class="section-label" style="margin-top:0">Facility Parameters</div>
+              <div class="form-grid">
+                <div class="fg" style="grid-column:1/-1">
+                  <label for="n-product">Loan product</label>
+                  <select id="n-product" onchange="LOSModule.applyProduct()">
+                    <option value="">Select a credit product…</option>
+                  </select>
+                </div>
+                <div class="fg">
+                  <label>Requested Principal Amount (KES)</label>
+                  <input id="n-amt" type="text" inputmode="numeric" placeholder="500,000" oninput="LOSModule.formatAmountInput(this); LOSModule.updateLoanPreview()">
+                </div>
+                <div class="fg">
+                  <label>Loan Purpose</label>
+                  <input id="n-purpose" placeholder="Working Capital / Business Expansion / School Fees">
+                </div>
+                <div class="fg">
+                  <label>Tenure (months)</label>
+                  <input id="n-tenor" type="number" min="1" value="12" oninput="LOSModule.updateLoanPreview()">
+                </div>
+                <div class="fg">
+                  <label>Interest % p.m. (flat)</label>
+                  <input id="n-rate" type="number" min="0" step="0.01" value="5" oninput="LOSModule.updateLoanPreview()">
+                </div>
+                <div class="fg">
+                  <label>Tracking fee / month (KES)</label>
+                  <input id="n-track" type="text" inputmode="numeric" min="0" value="0" oninput="LOSModule.formatAmountInput(this); LOSModule.updateLoanPreview()">
+                </div>
+                <div class="fg">
+                  <label>Weekly penalty %</label>
+                  <input id="n-pen" type="number" min="0" step="0.01" value="5" oninput="LOSModule.updateLoanPreview()">
+                </div>
+                <div class="fg">
+                  <label>Grace days</label>
+                  <input id="n-grace" type="number" min="0" value="7" oninput="LOSModule.updateLoanPreview()">
+                </div>
+                <div class="fg">
+                  <label>Proposed disbursement date</label>
+                  <input id="n-disb" type="date" oninput="LOSModule.onDisbursementChange()">
+                </div>
+                <div class="fg">
+                  <label>First installment date</label>
+                  <input id="n-firstDue" type="date" oninput="LOSModule.updateLoanPreview()">
+                </div>
+              </div>
+              <div id="product-policy-warn" class="alert" style="display:none;background:#FFF7ED;border:1px solid #FDBA74;color:#9A3412;margin-top:12px"></div>
+
+              <div style="margin:1rem 0;display:flex;align-items:center;gap:10px">
+                <label for="n-loan-type" style="font-size:12.5px;font-weight:600;white-space:nowrap">Type of loan</label>
+                <select id="n-loan-type" onchange="LOSModule.toggleLoanType()" style="max-width:280px">
+                  <option value="STRAIGHT_LOAN">Straight Loan</option>
+                  <option value="ASSET_FINANCE">Asset Finance</option>
+                  <option value="BUY_OFF">Buy-off</option>
+                </select>
+              </div>
+
+              <div id="buyoff-fields" style="display:none;background:var(--bg-surface-secondary);padding:14px;border-radius:var(--radius-md);margin-bottom:1rem">
+                <div class="section-label" style="margin-top:0">Buy-off Customer &amp; Lender Details</div>
+                <div class="form-grid">
+                  <div class="fg"><label>Company Name</label><input id="n-buyoff-company" placeholder="e.g. ABC Finance Ltd"></div>
+                  <div class="fg"><label>Company Address</label><input id="n-buyoff-address" placeholder="Address as per lender records"></div>
+                  <div class="fg"><label>Town</label><input id="n-buyoff-town" placeholder="e.g. Nairobi"></div>
+                  <div class="fg"><label>Client Names</label><input id="n-buyoff-client" placeholder="Full client names"></div>
+                  <div class="fg"><label>Motor Vehicle Registration No.</label><input id="n-buyoff-reg" placeholder="e.g. KCA 123A" oninput="this.value = this.value.toUpperCase()"></div>
+                  <div class="fg"><label>ID Number</label><input id="n-buyoff-id" placeholder="National ID / Passport Number"></div>
+                  <div class="fg"><label>KRA PIN</label><input id="n-buyoff-kra" placeholder="e.g. A009847162K"></div>
+                  <div class="fg"><label>Current Lender Institution</label><input id="n-lender" placeholder="e.g. KCB Bank / Platinum Credit"></div>
+                  <div class="fg"><label>Existing Outstanding Balance (KES)</label><input id="n-outstanding" type="text" inputmode="numeric" placeholder="200,000" oninput="LOSModule.formatAmountInput(this)"></div>
+                  <div class="fg"><label>Buyoff Payoff Sum to Lender (KES)</label><input id="n-buyoff-amt" type="text" inputmode="numeric" placeholder="210,000" oninput="LOSModule.formatAmountInput(this)"></div>
+                  <div class="fg"><label>Net Cash Payout to Customer (KES)</label><input id="n-net" type="text" inputmode="numeric" placeholder="290,000" oninput="LOSModule.formatAmountInput(this)"></div>
+                </div>
+              </div>
+
+              <div id="asset-finance-fields" style="display:none;background:var(--bg-surface-secondary);padding:14px;border-radius:var(--radius-md);margin-bottom:1rem">
+                <div class="section-label" style="margin-top:0">Asset Finance Seller &amp; Customer Details</div>
+                <div class="form-grid">
+                  <div class="fg"><label>Seller Name</label><input id="n-seller-name" placeholder="Vehicle seller / dealer name"></div>
+                  <div class="fg"><label>Seller Address as per KRA</label><input id="n-seller-address" placeholder="Address as stated on KRA documents"></div>
+                  <div class="fg"><label>Seller Town</label><input id="n-seller-town" placeholder="e.g. Nairobi"></div>
+                  <div class="fg"><label>Client Name</label><input id="n-asset-client" placeholder="Full client name"></div>
+                  <div class="fg"><label>Client KRA PIN</label><input id="n-asset-kra" placeholder="e.g. A009847162K"></div>
+                </div>
+              </div>
+
+              <!-- Flat-interest logbook quote mapped to this client -->
+              <div id="loan-preview-box" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:var(--radius-md);padding:14px;margin-top:1rem">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#166534;margin-bottom:8px" id="prev-quote-title">
+                  Logbook calculator quote (flat interest)
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:12px">
+                  <div><div style="font-size:11px;color:#166534">Monthly installment</div><div id="prev-monthly" style="font-size:16px;font-weight:700;color:#15803D">—</div></div>
+                  <div><div style="font-size:11px;color:#166534">On-time total payable</div><div id="prev-total" style="font-size:16px;font-weight:700;color:#0F172A">—</div></div>
+                  <div><div style="font-size:11px;color:#166534">Total interest</div><div id="prev-int" style="font-size:16px;font-weight:700;color:#B91C1C">—</div></div>
+                  <div><div style="font-size:11px;color:#166534">Tracking (full tenor)</div><div id="prev-track" style="font-size:16px;font-weight:700;color:#0F172A">—</div></div>
+                </div>
+                <div id="onboard-schedule-preview" class="onboard-schedule" style="display:none"></div>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;margin-top:1.25rem">
+                <button class="btn" onclick="LOSModule.goStep(1)"><i class="ti ti-arrow-left"></i> Back</button>
+                <button class="btn btn-primary" onclick="LOSModule.goStep(3)">Next: Vehicle Collateral <i class="ti ti-arrow-right"></i></button>
+              </div>
+            </div>
+
+            <!-- Step 3: Collateral & Vehicle Valuation -->
+            <div id="step-3" style="display:none">
+              <div class="section-label" style="margin-top:0">Vehicle Specifications & Valuation</div>
+              <div class="form-grid">
+                <div class="fg"><label>Registration Number (e.g. KCA 123A)</label><input id="n-reg" placeholder="KCA 123A" oninput="this.value = this.value.toUpperCase()"></div>
+                <div class="fg"><label>Make & Model (e.g. Toyota Fielder / Mazda Demio)</label><input id="n-make" placeholder="Toyota Fielder 2017"></div>
+                <div class="fg"><label>Year of Manufacture</label><input id="n-year" type="number" placeholder="2017"></div>
+                <div class="fg"><label>Engine Number</label><input id="n-eng" placeholder="1NZ-882910"></div>
+                <div class="fg"><label>Chassis Number (VIN)</label><input id="n-chassis" placeholder="NZE161-009281"></div>
+                <div class="fg">
+                  <label for="n-val">Market Value (KES) <span aria-hidden="true">*</span></label>
+                  <input id="n-val" type="text" inputmode="numeric" placeholder="1,200,000" required oninput="LOSModule.formatAmountInput(this); LOSModule.updateLoanPreview()">
+                </div>
+                <div class="fg">
+                  <label for="n-fsv">Forced Sale Value (KES) <span aria-hidden="true">*</span></label>
+                  <input id="n-fsv" type="text" inputmode="numeric" placeholder="900,000" required oninput="LOSModule.formatAmountInput(this)">
+                </div>
+                <div class="fg">
+                  <label for="n-val-date">Valuation Date <span aria-hidden="true">*</span></label>
+                  <input id="n-val-date" type="date" required>
+                </div>
+                <div class="fg">
+                  <label for="n-ins-expiry">Insurance Expiry Date <span aria-hidden="true">*</span></label>
+                  <input id="n-ins-expiry" type="date" required>
+                </div>
+              </div>
+
+              <div id="ltv-check" style="margin-top:10px;font-size:12px;padding:8px 12px;background:var(--bg-surface-secondary);border-radius:6px">
+                Enter Valuation to compute Loan-to-Value (LTV) ratio.
+              </div>
+
+              <div style="display:flex;justify-content:space-between;margin-top:1.25rem">
+                <button class="btn" onclick="LOSModule.goStep(2)"><i class="ti ti-arrow-left"></i> Back</button>
+                <button class="btn btn-primary" onclick="LOSModule.goStep(4)">Next: Document Uploads <i class="ti ti-arrow-right"></i></button>
+              </div>
+            </div>
+
+            <!-- Step 4: KYC & Supporting Documents -->
+            <div id="step-4" style="display:none">
+              <div class="alert alert-info" style="margin-top:0">
+                <i class="ti ti-upload"></i>
+                <span>Select a PDF or image (JPG, PNG, WEBP) for each slot — max 5 MB. Files stay on this application file and can be previewed by Risk.</span>
+              </div>
+              <div class="section-label" style="margin-top:0">Borrower KYC &amp; Identity Documents</div>
+              <div id="borrower-kyc-doc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="upload-box" id="doc-box-id_front" data-doc-id="id_front" onclick="LOSModule.openDocPicker(event, 'id_front')">
+                  <input type="file" id="file-id_front" accept=".pdf,.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp,application/pdf" capture="environment" onclick="event.stopPropagation()" onchange="LOSModule.handleDocUpload(event, 'id_front')">
+                  <div class="upload-box-inner" id="doc-inner-id_front"></div>
+                </div>
+                <div class="upload-box" id="doc-box-id_back" data-doc-id="id_back" onclick="LOSModule.openDocPicker(event, 'id_back')">
+                  <input type="file" id="file-id_back" accept=".pdf,.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp,application/pdf" capture="environment" onclick="event.stopPropagation()" onchange="LOSModule.handleDocUpload(event, 'id_back')">
+                  <div class="upload-box-inner" id="doc-inner-id_back"></div>
+                </div>
+                <div class="upload-box" id="doc-box-kra_pin" data-doc-id="kra_pin" onclick="LOSModule.openDocPicker(event, 'kra_pin')">
+                  <input type="file" id="file-kra_pin" accept=".pdf,.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp,application/pdf" onclick="event.stopPropagation()" onchange="LOSModule.handleDocUpload(event, 'kra_pin')">
+                  <div class="upload-box-inner" id="doc-inner-kra_pin">
+                    <i class="ti ti-cloud-upload" style="font-size:22px;display:block;margin-bottom:6px"></i>
+                    <strong>KRA PIN Certificate</strong>
+                    <span class="upload-hint">Click or drop PDF, JPG, PNG or WEBP · max 5 MB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="section-label">Financial &amp; Affordability Documents</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="upload-box" id="doc-box-bank_statement" data-doc-id="bank_statement" onclick="LOSModule.openDocPicker(event, 'bank_statement')">
+                  <input type="file" id="file-bank_statement" accept=".pdf,.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp,application/pdf" onclick="event.stopPropagation()" onchange="LOSModule.handleDocUpload(event, 'bank_statement')">
+                  <div class="upload-box-inner" id="doc-inner-bank_statement">
+                    <i class="ti ti-cloud-upload" style="font-size:22px;display:block;margin-bottom:6px"></i>
+                    <strong>6-Month Bank Statement</strong>
+                    <span class="upload-hint">Click or drop PDF, JPG, PNG or WEBP · max 5 MB</span>
+                  </div>
+                </div>
+                <div class="upload-box" id="doc-box-mpesa_statement" data-doc-id="mpesa_statement" onclick="LOSModule.openDocPicker(event, 'mpesa_statement')">
+                  <input type="file" id="file-mpesa_statement" accept=".pdf,.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp,application/pdf" onclick="event.stopPropagation()" onchange="LOSModule.handleDocUpload(event, 'mpesa_statement')">
+                  <div class="upload-box-inner" id="doc-inner-mpesa_statement">
+                    <i class="ti ti-cloud-upload" style="font-size:22px;display:block;margin-bottom:6px"></i>
+                    <strong>6-Month M-Pesa Statement</strong>
+                    <span class="upload-hint">Click or drop PDF, JPG, PNG or WEBP · max 5 MB</span>
+                  </div>
+                </div>
+              </div>
+              <div class="fg" style="max-width:520px;margin-top:10px">
+                <label for="mpesa-statement-password">M-Pesa statement password (if protected)</label>
+                <input id="mpesa-statement-password" type="password" autocomplete="new-password" placeholder="Enter statement password" oninput="LOSModule.captureMpesaStatementPassword(this.value)">
+                <span class="upload-hint">Captured by Branch Admin and attached to this application for review.</span>
+              </div>
+
+              <div class="section-label">Collateral &amp; Logbook Documents</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="upload-box" id="doc-box-logbook_copy" data-doc-id="logbook_copy" onclick="LOSModule.openDocPicker(event, 'logbook_copy')">
+                  <input type="file" id="file-logbook_copy" accept=".pdf,.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp,application/pdf" onclick="event.stopPropagation()" onchange="LOSModule.handleDocUpload(event, 'logbook_copy')">
+                  <div class="upload-box-inner" id="doc-inner-logbook_copy">
+                    <i class="ti ti-cloud-upload" style="font-size:22px;display:block;margin-bottom:6px"></i>
+                    <strong>Original Logbook Copy</strong>
+                    <span class="upload-hint">Click or drop PDF, JPG, PNG or WEBP · max 5 MB</span>
+                  </div>
+                </div>
+                <div class="upload-box" id="doc-box-valuation_report" data-doc-id="valuation_report" onclick="LOSModule.openDocPicker(event, 'valuation_report')">
+                  <input type="file" id="file-valuation_report" accept=".pdf,.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp,application/pdf" onclick="event.stopPropagation()" onchange="LOSModule.handleDocUpload(event, 'valuation_report')">
+                  <div class="upload-box-inner" id="doc-inner-valuation_report">
+                    <i class="ti ti-cloud-upload" style="font-size:22px;display:block;margin-bottom:6px"></i>
+                    <strong>Valuation Report</strong>
+                    <span class="upload-hint">Click or drop PDF, JPG, PNG or WEBP · max 5 MB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;margin-top:1.25rem">
+                <button class="btn" onclick="LOSModule.goStep(3)"><i class="ti ti-arrow-left"></i> Back</button>
+                <button class="btn btn-primary" onclick="LOSModule.goStep(5)">Review &amp; Risk Score <i class="ti ti-arrow-right"></i></button>
+              </div>
+            </div>
+
+            <!-- Step 5: Review & Submit -->
+            <div id="step-5" style="display:none">
+              <div id="review-content">
+                <!-- Rendered by buildReviewSummary() -->
+              </div>
+
+              <div style="display:flex;justify-content:space-between;margin-top:1.5rem">
+                <button class="btn" onclick="LOSModule.goStep(4)"><i class="ti ti-arrow-left"></i> Back</button>
+                <button class="btn btn-success btn-lg" onclick="LOSModule.submitNewApplication()">
+                  <i class="ti ti-check"></i> Submit Application to Risk Pipeline
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: APPLICATION DETAIL (LOS 10-STAGE WORKFLOW)                  -->
+      <!-- ================================================================= -->
+      <div id="tab-application-detail" class="tab-pane">
+        <div id="app-detail-content">
+          <!-- Rendered by LOSModule.openApplicationDetail() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: LMS ACTIVE LOANS PORTFOLIO                                  -->
+      <!-- ================================================================= -->
+      <div id="tab-loans" class="tab-pane">
+        <div class="card">
+                      <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title">Core Loan Management System (LMS) — Active Servicing Portfolio</span>
+              <span class="badge" id="lms-active-count" style="background:#EFF6FF;color:#0284C7">0 LMS loan accounts</span>
+            </div>
+            <span class="badge" style="background:#ECFDF5;color:#059669">Live Portfolio Engine</span>
+          </div>
+          <div class="card-body">
+            <!-- Search & Aging Filter -->
+            <div style="display:flex;gap:10px;margin-bottom:1rem">
+              <input type="text" id="loan-search" placeholder="Search by customer, account number, or registration…" 
+                style="flex:1;font-size:12.5px;padding:7px 11px;border:1px solid var(--border-medium);border-radius:var(--radius-md)" 
+                oninput="LMSModule.renderLoansTable()">
+
+              <select id="par-filter" style="width:220px;font-size:12.5px;padding:7px 11px;border:1px solid var(--border-medium);border-radius:var(--radius-md)" 
+                onchange="LMSModule.renderLoansTable()">
+                <option value="">All Loan Accounts</option>
+                <option value="PAR_0">Current / Normal (PAR 0)</option>
+                <option value="ARREARS">All Delinquent Loans (DPD > 0)</option>
+                <option value="PAR_1_30">Watchlist (PAR 1-30)</option>
+                <option value="PAR_31_60">Substandard (PAR 31-60)</option>
+                <option value="PAR_61_90">Doubtful (PAR 61-90)</option>
+                <option value="PAR_90_PLUS">Non-Performing (PAR 90+)</option>
+                <option value="PAID_IN_FULL">Paid in Full / Closure</option>
+                <option value="CLOSED">Closed · Logbook Released</option>
+              </select>
+            </div>
+
+            <div id="loans-table-container">
+              <!-- Rendered by LMSModule -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: LOAN DETAIL (LMS ACCOUNT 360)                               -->
+      <!-- ================================================================= -->
+      <div id="tab-loan-detail" class="tab-pane">
+        <div id="loan-detail-content">
+          <!-- Rendered by LMSModule.openLoan360() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: COLLECTIONS & ARREARS                                       -->
+      <!-- ================================================================= -->
+      <div id="tab-collections" class="tab-pane">
+        <div id="collections-content">
+          <!-- Rendered by App.renderCollectionsView() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: COLLATERAL & SAFE VAULT                                     -->
+      <!-- ================================================================= -->
+      <div id="tab-collateral" class="tab-pane">
+        <div id="collateral-content">
+          <!-- Rendered by App.renderCollateralVault() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: COLLATERAL RELEASE WORKFLOW                                 -->
+      <!-- ================================================================= -->
+      <div id="tab-release-detail" class="tab-pane">
+        <div id="release-detail-content">
+          <!-- Rendered by LMSModule.openReleaseWorkflow() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: GENERAL LEDGER & ACCOUNTING                                 -->
+      <!-- ================================================================= -->
+      <div id="tab-ledger" class="tab-pane">
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-title">Gross Deployed Facility</span><div class="metric-icon" style="background:#EFF6FF;color:#0284C7"><i class="ti ti-cash-banknote"></i></div></div>
+            <div class="metric-value" id="led-total-disbursed">KES 0</div>
+            <div class="metric-footer">Asset Account 1200</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-title">Active Loans Receivable</span><div class="metric-icon" style="background:#ECFDF5;color:#059669"><i class="ti ti-wallet"></i></div></div>
+            <div class="metric-value" id="led-total-receivable">KES 0</div>
+            <div class="metric-footer">Current Principal Asset</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-title">Recognized Interest Income</span><div class="metric-icon" style="background:#FAF5FF;color:#7C3AED"><i class="ti ti-trending-up"></i></div></div>
+            <div class="metric-value" id="led-interest-income">KES 0</div>
+            <div class="metric-footer">Revenue Account 4010</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-title">Late Fee Penalties Income</span><div class="metric-icon" style="background:#FEF2F2;color:#DC2626"><i class="ti ti-gavel"></i></div></div>
+            <div class="metric-value" id="led-penalty-income">KES 0</div>
+            <div class="metric-footer">Revenue Account 4030</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Post a Journal Entry</span>
+            <span style="font-size:11px;color:var(--text-secondary)">One debit and one equal credit</span>
+          </div>
+          <div class="card-body">
+            <form id="accounting-journal-form" onsubmit="LedgerModule.postJournal(event)" autocomplete="off">
+              <div class="form-grid">
+                <div class="fg"><label for="journal-date">Transaction date</label><input id="journal-date" type="date" required></div>
+                <div class="fg"><label for="journal-reference">Reference</label><input id="journal-reference" maxlength="80" placeholder="Receipt, invoice or payment reference"></div>
+                <div class="fg" style="grid-column:1/-1"><label for="journal-description">Description</label><input id="journal-description" maxlength="180" placeholder="Reason for this accounting entry" required></div>
+                <div class="fg"><label for="journal-debit-account">Debit account</label><select id="journal-debit-account" required></select></div>
+                <div class="fg"><label for="journal-credit-account">Credit account</label><select id="journal-credit-account" required></select></div>
+                <div class="fg"><label for="journal-amount">Amount (KES)</label><input id="journal-amount" type="number" min="0.01" step="0.01" required></div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-top:12px">
+                <button type="submit" class="btn btn-primary"><i class="ti ti-device-floppy"></i> Post balanced entry</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Trial Balance</span>
+            <span style="font-size:11px;color:var(--text-secondary)">Balances calculated from posted journal entries</span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div id="trial-balance-container"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Double-Entry Financial Journal Audit Log</span>
+            <span style="font-size:11px;color:var(--text-secondary)">Balanced Ledger Entries (Debits = Credits)</span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div id="ledger-table-container">
+              <!-- Rendered by LedgerModule -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- FINANCIAL REPORTS                                                 -->
+        <!-- ================================================================= -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Financial Reports</span>
+            <span style="font-size:11px;color:var(--text-secondary)">Generate income statement, balance sheet, and other reports</span>
+          </div>
+          <div class="card-body" id="reports-container">
+            <!-- Reports will be rendered here -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem">
+              <button class="btn btn-sm btn-primary" onclick="LedgerModule.generateIncomeStatement()">
+                <i class="ti ti-chart-line"></i> Income Statement
+              </button>
+              <button class="btn btn-sm btn-primary" onclick="LedgerModule.generateBalanceSheet()">
+                <i class="ti ti-chart-bar"></i> Balance Sheet
+              </button>
+              <button class="btn btn-sm btn-primary" onclick="LedgerModule.generateCashFlow()">
+                <i class="ti ti-chart-area"></i> Cash Flow Statement
+              </button>
+              <button class="btn btn-sm btn-primary" onclick="LedgerModule.generateTrialBalance()">
+                <i class="ti ti-scale"></i> Trial Balance
+              </button>
+            </div>
+            <div id="report-output">
+              <!-- Report content will appear here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: ANALYTICS & PAR DASHBOARD                                   -->
+      <!-- ================================================================= -->
+      <div id="tab-analytics" class="tab-pane">
+        <div id="analytics-content">
+          <!-- Rendered by App.renderAnalytics() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: BRANCH MANAGEMENT                                            -->
+      <!-- ================================================================= -->
+      <div id="tab-branches" class="tab-pane">
+        <div id="branches-content">
+          <!-- Rendered by App.renderBranches() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: STAFF MANAGEMENT                                             -->
+      <!-- ================================================================= -->
+      <div id="tab-staff" class="tab-pane">
+        <div id="staff-content">
+          <!-- Rendered by App.renderStaff() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: SYSTEM CONFIGURATION                                        -->
+      <!-- ================================================================= -->
+      <div id="tab-system-config" class="tab-pane">
+        <div id="system-config-content">
+          <!-- Rendered by App.renderSystemConfiguration() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: SYSTEM AUDIT LOG                                             -->
+      <!-- ================================================================= -->
+      <div id="tab-audit-log" class="tab-pane">
+        <div id="audit-log-content">
+          <!-- Rendered by App.renderAuditLog() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: NOTIFICATIONS CENTER                                        -->
+      <!-- ================================================================= -->
+      <div id="tab-notifications" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Role-Based Notifications & Action Alerts</span>
+            <button class="btn btn-sm" onclick="App.markAllNotificationsRead()">
+              <i class="ti ti-check"></i> Mark All as Read
+            </button>
+          </div>
+          <div class="card-body" style="padding:0" id="noti-list-content">
+            <!-- Rendered by App.renderNotificationsList() -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: PRODUCTS & POLICY SETTINGS                                   -->
+      <!-- ================================================================= -->
+      <div id="tab-products" class="tab-pane">
+        <div id="products-content">
+          <!-- Rendered by App.renderProducts() -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB: LOGBOOK LOAN CALCULATOR                                      -->
+      <!-- ================================================================= -->
+      <div id="tab-calculator" class="tab-pane">
+        <div id="logbook-calc" class="calc-shell">
+          <aside class="calc-sidebar no-print">
+            <div class="card" style="margin:0">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <i class="ti ti-calculator" style="color:var(--brand-accent);font-size:16px"></i>
+                  <span class="card-title">Loan details</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <p class="hint" style="margin-top:0">Schedule, arrears and statements appear only after disbursement, for Overall Admin and Collection &amp; Recovery. Load a live LMS account — receipts, weekly penalties and demand fees are only what you record.</p>
+                <div class="fg" style="margin-bottom:12px">
+                  <label for="calcLoanPick">Load disbursed LMS account</label>
+                  <select id="calcLoanPick">
+                    <option value="">Load a live (disbursed) account…</option>
+                  </select>
+                </div>
+                <p id="calc-source-note" class="hint" style="margin-top:0"></p>
+                <div id="calc-examples" class="calc-examples">
+                  <div class="section-label" style="margin-top:0">Worked examples (KES 3,000,000 · 24 months · 248,000)</div>
+                  <button type="button" class="btn btn-sm calc-example" data-example="missed">1. Missed first installment → 287,091</button>
+                  <button type="button" class="btn btn-sm calc-example" data-example="late">2. Late payment that clears installment</button>
+                  <button type="button" class="btn btn-sm calc-example" data-example="partial">3. Partial payment → 98,000 + 4,900</button>
+                  <button type="button" class="btn btn-sm calc-example" data-example="ontime">4. Paid on time → COMPLETED / CLOSED</button>
+                  <button type="button" class="btn btn-sm calc-example" data-example="release">5. Paid in Full → logbook release</button>
+                  <button type="button" class="btn btn-sm calc-example" data-example="rolled">Rolled arrears through next installment</button>
+                </div>
+                <form id="loanForm" autocomplete="off">
+                  <div class="fg"><label for="clientName">Client name</label><input id="clientName" type="text" placeholder="e.g. Peter Kamau Mwangi"></div>
+                  <div class="fg"><label for="logbookRef">Logbook / vehicle</label><input id="logbookRef" type="text" placeholder="e.g. KBB 999P · Toyota Premio"></div>
+                  <div class="form-grid" style="margin-top:10px">
+                    <div class="fg"><label for="currency">Currency</label>
+                      <select id="currency">
+                        <option value="KES" selected>KES</option>
+                        <option value="USD">USD</option>
+                        <option value="UGX">UGX</option>
+                        <option value="TZS">TZS</option>
+                      </select>
+                    </div>
+                    <div class="fg"><label for="principal">Principal</label><input id="principal" type="text" inputmode="numeric" placeholder="400,000"></div>
+                    <div class="fg"><label for="tenure">Tenure (months)</label><input id="tenure" type="number" min="1" step="1" placeholder="12"></div>
+                    <div class="fg"><label for="rate">Interest % p.m. (flat)</label><input id="rate" type="number" min="0" step="0.01" placeholder="5"></div>
+                    <div class="fg"><label for="trackingFee">Tracking fee / month</label><input id="trackingFee" type="text" inputmode="numeric" value="0"></div>
+                    <div class="fg"><label for="penaltyRate">Weekly penalty %</label><input id="penaltyRate" type="number" min="0" step="0.01" value="5"></div>
+                    <div class="fg"><label for="graceDays">Grace days</label><input id="graceDays" type="number" min="0" step="1" value="7"></div>
+                    <div class="fg"><label for="disbursement">Disbursement date</label><input id="disbursement" type="date"></div>
+                    <div class="fg"><label for="firstDue">First installment date</label><input id="firstDue" type="date"></div>
+                    <div class="fg"><label for="asOf">As-of date</label><input id="asOf" type="date"></div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </aside>
+
+          <section class="calc-main">
+            <div id="kpis" class="calc-kpis no-print"></div>
+            <div id="formula" class="calc-formula no-print"></div>
+
+            <div class="card" style="margin:0">
+              <div class="card-header calc-tabs no-print" role="tablist">
+                <button type="button" class="calc-tab is-active" data-tab="ontime" role="tab" aria-selected="true">On-time schedule</button>
+                <button type="button" class="calc-tab" data-tab="arrears" role="tab" aria-selected="false">Arrears &amp; penalty</button>
+                <button type="button" class="calc-tab" data-tab="payments" role="tab" aria-selected="false">Receipts</button>
+                <button type="button" class="calc-tab" data-tab="demand" role="tab" aria-selected="false">Demand fees</button>
+                <button type="button" class="calc-tab" data-tab="statement" role="tab" aria-selected="false">Client statement</button>
+                <button type="button" class="calc-tab" data-tab="release" role="tab" aria-selected="false">Logbook release</button>
+              </div>
+
+              <div class="card-body">
+                <div id="view-ontime">
+                  <div class="table-responsive">
+                    <table id="scheduleTable" class="tbl calc-table">
+                      <thead></thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div id="view-arrears" class="is-hidden">
+                  <p id="arrearsIntro" class="hint"></p>
+                  <div class="calc-toolbar no-print">
+                    <button type="button" class="btn btn-sm btn-success" id="btnGoPayments"><i class="ti ti-receipt"></i> Record a receipt</button>
+                    <button type="button" class="btn btn-sm" id="btnGoDemand"><i class="ti ti-file-alert"></i> Add demand fee</button>
+                  </div>
+                  <div class="calc-split">
+                    <div id="arrearsSummary" class="calc-ledger"></div>
+                    <div class="table-responsive">
+                      <table id="arrearsTable" class="tbl calc-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="view-payments" class="is-hidden">
+                  <div class="calc-split">
+                    <div>
+                      <form id="paymentForm" class="calc-capture" autocomplete="off">
+                        <div class="fg"><label for="payInstallment">Apply to installment</label><select id="payInstallment"></select></div>
+                        <div class="form-grid">
+                          <div class="fg"><label for="payDate">Receipt date</label><input id="payDate" type="date" required></div>
+                          <div class="fg"><label for="payAmount">Amount</label><input id="payAmount" type="text" inputmode="numeric" placeholder="0" required></div>
+                        </div>
+                        <div class="fg"><label for="payRef">Receipt / reference</label><input id="payRef" type="text" placeholder="e.g. REC-MPESA-QW7821"></div>
+                        <p id="payHint" class="hint"></p>
+                        <div class="calc-toolbar">
+                          <button type="submit" class="btn btn-sm btn-success"><i class="ti ti-plus"></i> Capture receipt</button>
+                          <button type="button" class="btn btn-sm ghost" id="btnClearPaid">Clear receipts</button>
+                        </div>
+                      </form>
+                    </div>
+                    <div>
+                      <div id="paymentsSummary" class="calc-ledger"></div>
+                      <div class="table-responsive">
+                        <table id="paymentsTable" class="tbl calc-table">
+                          <thead></thead>
+                          <tbody></tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="view-demand" class="is-hidden">
+                  <p id="demandIntro" class="hint"></p>
+                  <div class="calc-split">
+                    <form id="demandForm" class="calc-capture" autocomplete="off">
+                      <div class="form-grid">
+                        <div class="fg"><label for="demandDate">Notice date</label><input id="demandDate" type="date" required></div>
+                        <div class="fg"><label for="demandAmount">Fee amount</label><input id="demandAmount" type="text" inputmode="numeric" placeholder="0" required></div>
+                      </div>
+                      <div class="fg"><label for="demandRef">Notice / reference</label><input id="demandRef" type="text" placeholder="e.g. REC/STATUTORY/ACC-2025-0003"></div>
+                      <div class="calc-toolbar">
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="ti ti-plus"></i> Capture demand fee</button>
+                        <button type="button" class="btn btn-sm" id="btnGoStatementFromDemand">Open statement</button>
+                      </div>
+                    </form>
+                    <div>
+                      <div id="demandSummary" class="calc-ledger"></div>
+                      <div class="table-responsive">
+                        <table id="demandTable" class="tbl calc-table">
+                          <thead></thead>
+                          <tbody></tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="view-statement" class="is-hidden">
+                  <p id="statementIntro" class="hint no-print"></p>
+                  <div class="calc-toolbar no-print">
+                    <form id="stmtDemandForm" class="calc-inline-form" autocomplete="off">
+                      <input id="stmtDemandDate" type="date" required title="Demand date">
+                      <input id="stmtDemandAmount" type="text" inputmode="numeric" placeholder="Demand fee" required>
+                      <input id="stmtDemandRef" type="text" placeholder="Notice ref">
+                      <button type="submit" class="btn btn-sm">Add demand fee</button>
+                    </form>
+                    <button type="button" class="btn btn-sm btn-primary" id="btnPrintStatement"><i class="ti ti-printer"></i> Print statement</button>
+                  </div>
+                  <div id="statementDoc"></div>
+                </div>
+
+                <div id="view-release" class="is-hidden">
+                  <p id="releaseIntro" class="hint no-print"></p>
+                  <div id="releaseSteps" class="stage-flow-track release-flow no-print"></div>
+                  <div id="releasePanel" class="calc-split">
+                    <div id="releaseSummary" class="calc-ledger"></div>
+                    <div>
+                      <div class="calc-toolbar no-print" id="releaseToolbar"></div>
+                      <div id="releaseDoc"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: REPAYMENT CASHIER (M-PESA & WATERFALL)                     -->
+    <!-- ================================================================= -->
+    <div class="modal-overlay" id="cashier-modal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <span class="modal-title"><i class="ti ti-cash"></i> Repayment Cashier & Waterfall Allocator</span>
+          <button class="modal-close" onclick="document.getElementById('cashier-modal').classList.remove('active')">&times;</button>
+        </div>
+        <div class="modal-body" id="cashier-modal-content">
+          <!-- Populated by LMSModule.openCashierModal() -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: DOCUMENT VIEWER / OFFER LETTER / DEMAND NOTICE             -->
+    <!-- ================================================================= -->
+    <div class="modal-overlay" id="offer-letter-modal">
+      <div class="modal-container wide" style="max-width:980px;width:95vw">
+        <div class="modal-header">
+          <span class="modal-title"><i class="ti ti-file-text"></i> Official Financial Document</span>
+          <button class="modal-close" onclick="document.getElementById('offer-letter-modal').classList.remove('active')">&times;</button>
+        </div>
+        <div class="modal-body" id="offer-letter-content" style="padding:0">
+          <!-- Populated by printOfferLetter / showPayoffModal / showDemandNoticeModal / openDocPreview -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: ADD BRANCH                                                  -->
+    <!-- ================================================================= -->
+    <div class="modal-overlay" id="branch-modal" onclick="if(event.target===this)App.closeBranchModal()">
+      <div class="modal-container">
+        <div class="modal-header">
+          <span class="modal-title"><i class="ti ti-building-community"></i> Add Branch</span>
+          <button class="modal-close" onclick="App.closeBranchModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="branch-form" autocomplete="off" onsubmit="App.saveBranch(event)">
+            <div class="section-label" style="margin-top:0">Branch details</div>
+            <div class="form-grid">
+              <div class="fg">
+                <label for="branch-name">Branch name</label>
+                <input id="branch-name" type="text" placeholder="e.g. Nakuru Branch" required>
+              </div>
+              <div class="fg">
+                <label for="branch-code">Branch code</label>
+                <input id="branch-code" type="text" placeholder="e.g. NKR" maxlength="10" required>
+              </div>
+              <div class="fg">
+                <label for="branch-location">Location</label>
+                <input id="branch-location" type="text" placeholder="e.g. Nakuru CBD" required>
+              </div>
+              <div class="fg">
+                <label for="branch-phone">Phone</label>
+                <input id="branch-phone" type="tel" placeholder="e.g. +254 709 000 004" required>
+              </div>
+              <div class="fg">
+                <label for="branch-manager">Branch manager</label>
+                <input id="branch-manager" type="text" placeholder="Manager name" required>
+              </div>
+              <div class="fg">
+                <label for="branch-status">Status</label>
+                <select id="branch-status">
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem">
+              <button type="button" class="btn" onclick="App.closeBranchModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary"><i class="ti ti-check"></i> Save branch</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: ADD STAFF                                                  -->
+    <!-- ================================================================= -->
+    <div class="modal-overlay" id="staff-modal" onclick="if(event.target===this)App.closeStaffModal()">
+      <div class="modal-container wide">
+        <div class="modal-header">
+          <span class="modal-title"><i class="ti ti-user-plus"></i> Add Staff Member</span>
+          <button class="modal-close" onclick="App.closeStaffModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="staff-form" autocomplete="off" onsubmit="App.saveStaff(event)">
+            <div class="section-label" style="margin-top:0">Staff details</div>
+            <div class="form-grid">
+              <div class="fg"><label for="staff-name">Full name</label><input id="staff-name" required placeholder="e.g. Jane Wambui"></div>
+              <div class="fg"><label for="staff-email">Email address</label><input id="staff-email" type="email" required placeholder="jane@spectrum.co.ke"></div>
+              <div class="fg"><label for="staff-phone">Phone</label><input id="staff-phone" type="tel" required placeholder="+254 700 000 000"></div>
+              <div class="fg"><label for="staff-gender">Gender</label><select id="staff-gender" required>
+                <option value="">Select gender</option>
+                <option value="FEMALE">Female</option>
+                <option value="MALE">Male</option>
+                <option value="OTHER">Other</option>
+                <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+              </select></div>
+              <div class="fg"><label for="staff-role">System role</label><select id="staff-role" required></select></div>
+              <div class="fg"><label for="staff-branch">Branch</label><select id="staff-branch" required></select></div>
+              <div class="fg"><label for="staff-status">Status</label><select id="staff-status"><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option></select></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem">
+              <button type="button" class="btn" onclick="App.closeStaffModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary"><i class="ti ti-check"></i> Save staff member</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: ADD / EDIT LOAN PRODUCT                                    -->
+    <!-- ================================================================= -->
+    <div class="modal-overlay" id="product-modal" onclick="if(event.target===this)App.closeProductModal()">
+      <div class="modal-container wide">
+        <div class="modal-header">
+          <span class="modal-title" id="product-modal-title"><i class="ti ti-settings-dollar"></i> Add Loan Product</span>
+          <button class="modal-close" onclick="App.closeProductModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="product-form" autocomplete="off" onsubmit="App.saveProduct(event)">
+            <input type="hidden" id="prd-id">
+            <div class="section-label" style="margin-top:0">Product identity</div>
+            <div class="form-grid">
+              <div class="fg" style="grid-column:1/-1">
+                <label for="prd-name">Product name</label>
+                <input id="prd-name" type="text" placeholder="e.g. Private Vehicle Logbook Loan" required>
+              </div>
+              <div class="fg">
+                <label for="prd-code">Product code</label>
+                <input id="prd-code" type="text" placeholder="Auto-assigned if blank" maxlength="24">
+              </div>
+              <div class="fg">
+                <label for="prd-status">Status</label>
+                <select id="prd-status">
+                  <option value="ACTIVE">Active — available at onboarding</option>
+                  <option value="INACTIVE">Inactive — hidden from new applications</option>
+                </select>
+              </div>
+              <div class="fg" style="grid-column:1/-1">
+                <label for="prd-desc">Description / collateral note</label>
+                <input id="prd-desc" type="text" placeholder="Original logbook + NTSA joint caveat">
+              </div>
+            </div>
+
+            <div class="section-label">Pricing &amp; tenor</div>
+            <div class="form-grid-3">
+              <div class="fg">
+                <label for="prd-rate">Default interest % p.m. (flat)</label>
+                <input id="prd-rate" type="number" min="0" step="0.01" value="5" required>
+              </div>
+              <div class="fg">
+                <label for="prd-min-tenor">Min tenor (months)</label>
+                <input id="prd-min-tenor" type="number" min="1" step="1" value="3" required>
+              </div>
+              <div class="fg">
+                <label for="prd-max-tenor">Max tenor (months)</label>
+                <input id="prd-max-tenor" type="number" min="1" step="1" value="24" required>
+              </div>
+              <div class="fg">
+                <label for="prd-min-amt">Minimum facility (KES)</label>
+                <input id="prd-min-amt" type="number" min="0" step="1000" value="50000">
+              </div>
+              <div class="fg">
+                <label for="prd-max-amt">Maximum facility (KES)</label>
+                <input id="prd-max-amt" type="number" min="0" step="1000" value="5000000" required>
+              </div>
+              <div class="fg">
+                <label for="prd-ltv">Max LTV (%)</label>
+                <input id="prd-ltv" type="number" min="1" max="100" step="1" value="80" required>
+              </div>
+            </div>
+
+            <div class="section-label">Servicing defaults</div>
+            <div class="form-grid-3">
+              <div class="fg">
+                <label for="prd-track">Tracking fee / month (KES)</label>
+                <input id="prd-track" type="number" min="0" step="100" value="0">
+              </div>
+              <div class="fg">
+                <label for="prd-pen">Weekly penalty %</label>
+                <input id="prd-pen" type="number" min="0" step="0.01" value="5">
+              </div>
+              <div class="fg">
+                <label for="prd-grace">Grace days</label>
+                <input id="prd-grace" type="number" min="0" step="1" value="7">
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;gap:8px;margin-top:1.25rem;flex-wrap:wrap">
+              <button type="button" class="btn btn-danger" id="prd-delete-btn" style="display:none" onclick="App.deleteProduct()">
+                <i class="ti ti-trash"></i> Remove product
+              </button>
+              <div style="display:flex;gap:8px;margin-left:auto">
+                <button type="button" class="btn" onclick="App.closeProductModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="prd-save-btn">
+                  <i class="ti ti-check"></i> Save product
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Application Logic Scripts -->
+  <script src="js/engine.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/los.js"></script>
+  <script src="js/lms.js"></script>
+  <script src="js/ledger.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/calculator.js"></script>
+  <script src="js/buyoff-offer-letter.js"></script>
+  <script>
+    const DEFAULT_DEMO_PASSWORD = 'Spectrum@2026';
+
+    function getDemoStaff() {
+      return [
+        { id: 'ST-001', name: 'Branch Admin User', email: 'branchadmin@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345678', gender: 'MALE', role: 'BRANCH_ADMIN', branch: 'BR-001', status: 'ACTIVE' },
+        { id: 'ST-002', name: 'Risk Officer User', email: 'riskofficer@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345679', gender: 'FEMALE', role: 'RISK_OFFICER', branch: 'BR-001', status: 'ACTIVE' },
+        { id: 'ST-003', name: 'Credit Risk Manager User', email: 'creditriskmanager@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345680', gender: 'MALE', role: 'CREDIT_RISK_MANAGER', branch: 'BR-001', status: 'ACTIVE' },
+        { id: 'ST-004', name: 'Credit Admin User', email: 'creditadmin@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345681', gender: 'FEMALE', role: 'CREDIT_ADMIN', branch: 'BR-001', status: 'ACTIVE' },
+        { id: 'ST-005', name: 'Finance Officer User', email: 'financeofficer@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345682', gender: 'MALE', role: 'FINANCE_OFFICER', branch: 'BR-001', status: 'ACTIVE' },
+        { id: 'ST-006', name: 'Finance Manager User', email: 'financemanager@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345683', gender: 'FEMALE', role: 'FINANCE_MANAGER', branch: 'BR-001', status: 'ACTIVE' },
+        { id: 'ST-007', name: 'Collection Officer User', email: 'collectionofficer@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345684', gender: 'MALE', role: 'COLLECTION_OFFICER', branch: 'BR-001', status: 'ACTIVE' },
+        { id: 'ST-008', name: 'Collection Manager User', email: 'collectionmanager@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345685', gender: 'FEMALE', role: 'COLLECTION_MANAGER', branch: 'BR-001', status: 'ACTIVE' },
+        { id: 'ST-009', name: 'Overall Admin User', email: 'overalladmin@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345686', gender: 'MALE', role: 'OVERALL_ADMIN', branch: 'BR-001', status: 'ACTIVE' },
+        { id: 'ST-010', name: 'Super Admin User', email: 'superadmin@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345687', gender: 'FEMALE', role: 'SUPER_ADMIN', branch: 'BR-001', status: 'ACTIVE' },
+        { id: 'ST-011', name: 'CEO Committee User', email: 'ceocommittee@spectrum.com', password: DEFAULT_DEMO_PASSWORD, phone: '0712345688', gender: 'MALE', role: 'CEO_COMMITTEE', branch: 'BR-001', status: 'ACTIVE' }
+      ];
+    }
+
+    function getStaffRecords() {
+      const STORAGE_KEY = 'SPECTRUM_LMS_LOS_DATA_V1';
+      let data = null;
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) data = JSON.parse(saved);
+      } catch (_) {}
+
+      const staff = Array.isArray(data?.staff) ? data.staff : getDemoStaff();
+      const normalized = staff.map(member => ({
+        ...member,
+        email: String(member.email || '').trim(),
+        password: member.password ? String(member.password) : DEFAULT_DEMO_PASSWORD,
+        status: member.status || 'ACTIVE'
+      }));
+
+      if (!data || !Array.isArray(data.staff) || data.staff.length !== normalized.length || data.staff.some((member, index) => member.password !== normalized[index].password)) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...(data || {}), staff: normalized }));
+        } catch (_) {}
+      }
+      return normalized;
+    }
+
+    function setAuthView(view) {
+      const loginView = document.getElementById('login-view');
+      const forgotView = document.getElementById('forgot-view');
+      const isLogin = view === 'login';
+      loginView.classList.toggle('hidden', !isLogin);
+      forgotView.classList.toggle('hidden', isLogin);
+    }
+
+    function showApp() {
+      const authShell = document.getElementById('auth-shell');
+      const appLayout = document.querySelector('.app-layout');
+      if (authShell) authShell.style.display = 'none';
+      if (appLayout) appLayout.style.display = 'block';
+      if (typeof App !== 'undefined' && typeof App.init === 'function') {
+        App.init();
+      }
+    }
+
+    function showLogin() {
+      const authShell = document.getElementById('auth-shell');
+      const appLayout = document.querySelector('.app-layout');
+      if (authShell) authShell.style.display = 'block';
+      if (appLayout) appLayout.style.display = 'none';
+      setAuthView('login');
+    }
+
+    const authUser = JSON.parse(sessionStorage.getItem('loggedInUser') || 'null');
+    if (authUser) {
+      showApp();
+    } else {
+      showLogin();
+      if (new URLSearchParams(window.location.search).get('view') === 'forgot') {
+        setAuthView('forgot');
+      }
+    }
+
+    const loginForm = document.getElementById('login-form');
+    const forgotForm = document.getElementById('forgot-form');
+    const loginEmail = document.getElementById('login-email');
+    const loginPassword = document.getElementById('login-password');
+    const forgotEmail = document.getElementById('forgot-email');
+
+    const loginAuthAlert = document.getElementById('login-auth-alert');
+
+    function showLoginAlert(message) {
+      if (!loginAuthAlert) return;
+      loginAuthAlert.innerHTML = `<span class="auth-alert-icon">×</span><span>${message}</span>`;
+      loginAuthAlert.classList.remove('hidden');
+    }
+
+    function clearLoginAlert() {
+      if (!loginAuthAlert) return;
+      loginAuthAlert.classList.add('hidden');
+      loginAuthAlert.innerHTML = '<span class="auth-alert-icon">×</span><span>Invalid credentials</span>';
+    }
+
+    function validateField(field, errorEl, message) {
+      const hasValue = (field.value || '').trim();
+      errorEl.textContent = hasValue ? '' : message;
+      field.closest('.field')?.classList.toggle('invalid', !hasValue);
+      return !!hasValue;
+    }
+
+    loginEmail.addEventListener('blur', () => validateField(loginEmail, document.getElementById('login-email-error'), 'Email is required'));
+    loginPassword.addEventListener('blur', () => validateField(loginPassword, document.getElementById('login-password-error'), 'Password is required'));
+
+    document.getElementById('toggle-password').addEventListener('click', () => {
+      const show = loginPassword.type === 'password';
+      loginPassword.type = show ? 'text' : 'password';
+      document.getElementById('toggle-password').textContent = show ? '🙈' : '👁';
+    });
+
+    document.getElementById('show-forgot').addEventListener('click', () => setAuthView('forgot'));
+    document.getElementById('back-to-login').addEventListener('click', () => setAuthView('login'));
+
+    function findActiveStaffMember(email, staffList = getStaffRecords()) {
+      const normalizedEmail = String(email || '').trim().toLowerCase();
+      if (!normalizedEmail) return null;
+
+      let match = (Array.isArray(staffList) ? staffList : [])
+        .find(member => String(member.email || '').trim().toLowerCase() === normalizedEmail && String(member.status || 'ACTIVE') === 'ACTIVE');
+
+      if (match) return match;
+
+      return getDemoStaff().find(member => String(member.email || '').trim().toLowerCase() === normalizedEmail && String(member.status || 'ACTIVE') === 'ACTIVE') || null;
+    }
+
+    loginForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearLoginAlert();
+      const emailValid = validateField(loginEmail, document.getElementById('login-email-error'), 'Email is required');
+      const passwordValid = validateField(loginPassword, document.getElementById('login-password-error'), 'Password is required');
+      if (!emailValid || !passwordValid) return;
+
+      const userEmail = loginEmail.value.trim().toLowerCase();
+      const userPassword = loginPassword.value;
+      const staff = getStaffRecords();
+      let user = findActiveStaffMember(userEmail, staff);
+
+      if (!user) {
+        user = findActiveStaffMember(userEmail, getDemoStaff());
+      }
+
+      if (!user) {
+        showLoginAlert('Invalid credentials');
+        return;
+      }
+
+      if (String(user.password || '').length === 0 || user.password !== userPassword) {
+        showLoginAlert('Invalid credentials');
+        return;
+      }
+
+      sessionStorage.setItem('loggedInUser', JSON.stringify(user));
+      showApp();
+    });
+
+    forgotForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const emailValid = validateField(forgotEmail, document.getElementById('forgot-email-error'), 'Email is required');
+      if (!emailValid) return;
+      alert('If an account exists, a password reset link has been sent.');
+      setAuthView('login');
+      forgotForm.reset();
+    });
+
+    window.addEventListener('storage', () => {
+      const user = JSON.parse(sessionStorage.getItem('loggedInUser') || 'null');
+      if (user) showApp(); else showLogin();
+    });
+    // Staff Register: add edit controls to active employee rows.
+    (() => {
+      const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[ch]));
+
+      const addStaffEditButtons = () => {
+        const container = document.getElementById('staff-content');
+        if (!container || typeof DataStore === 'undefined' || typeof App === 'undefined') return;
+        const data = DataStore.get();
+        if (!App.canManageStaff(data.activeRole)) return;
+
+        const rows = container.querySelectorAll('table tbody tr');
+        rows.forEach(row => {
+          if (row.dataset.staffEditReady) return;
+          const nameCell = row.querySelector('td');
+          const name = nameCell?.querySelector('strong')?.textContent.trim() || nameCell?.textContent.trim();
+          const employee = (data.staff || []).find(staff => staff.status === 'ACTIVE' && staff.name === name);
+          if (!employee) return;
+
+          const actionCell = document.createElement('td');
+          actionCell.style.textAlign = 'right';
+          actionCell.innerHTML = `<button type="button" class="btn btn-sm" onclick="App.openStaffEdit('${escapeHtml(employee.id)}')"><i class="ti ti-pencil"></i> Edit</button>`;
+          row.appendChild(actionCell);
+          row.dataset.staffEditReady = '1';
+        });
+
+        const header = container.querySelector('table thead tr');
+        if (header && !header.querySelector('[data-staff-action-heading]')) {
+          const th = document.createElement('th');
+          th.dataset.staffActionHeading = '1';
+          th.textContent = 'Action';
+          th.style.textAlign = 'right';
+          header.appendChild(th);
+        }
+      };
+
+      App.openStaffEdit = staffId => {
+        const data = DataStore.get();
+        if (!App.canManageStaff(data.activeRole)) {
+          alert('Only Overall Admin and Super Admin can edit staff.');
+          return;
+        }
+        const staff = (data.staff || []).find(employee => employee.id === staffId && employee.status === 'ACTIVE');
+        if (!staff) return;
+
+        let modal = document.getElementById('staff-edit-modal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'staff-edit-modal';
+          modal.className = 'modal-overlay';
+          document.body.appendChild(modal);
+        }
+        const roleOptions = Object.entries(data.roles || {}).map(([key, role]) =>
+          `<option value="${escapeHtml(key)}" ${key === staff.role ? 'selected' : ''}>${escapeHtml(role.title || key)}</option>`
+        ).join('');
+        const branchOptions = (data.branches || []).map(branch =>
+          `<option value="${escapeHtml(branch.id)}" ${branch.id === staff.branch ? 'selected' : ''}>${escapeHtml(branch.name)}</option>`
+        ).join('');
+
+        modal.innerHTML = `
+          <div class="modal-container" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <span class="modal-title"><i class="ti ti-user-edit"></i> Edit Active Employee</span>
+              <button type="button" class="modal-close" onclick="App.closeStaffEdit()">&times;</button>
+            </div>
+            <form class="modal-body" onsubmit="App.saveStaffEdit(event, '${escapeHtml(staff.id)}')">
+              <div class="form-grid">
+                <div class="fg"><label for="staff-edit-name">Full name</label><input id="staff-edit-name" value="${escapeHtml(staff.name)}" required></div>
+                <div class="fg"><label for="staff-edit-email">Email address</label><input id="staff-edit-email" type="email" value="${escapeHtml(staff.email)}" required></div>
+                <div class="fg"><label for="staff-edit-phone">Phone number</label><input id="staff-edit-phone" value="${escapeHtml(staff.phone)}" required></div>
+                <div class="fg"><label for="staff-edit-role">Role</label><select id="staff-edit-role" required>${roleOptions}</select></div>
+                <div class="fg"><label for="staff-edit-status">Status</label><select id="staff-edit-status" required>
+                  <option value="ACTIVE" ${staff.status === 'ACTIVE' ? 'selected' : ''}>Active</option>
+                  <option value="INACTIVE" ${staff.status === 'INACTIVE' ? 'selected' : ''}>Inactive</option>
+                </select></div>
+                <div class="fg" style="grid-column:1/-1"><label for="staff-edit-branch">Branch</label><select id="staff-edit-branch" required>${branchOptions}</select></div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+                <button type="button" class="btn" onclick="App.closeStaffEdit()">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i class="ti ti-device-floppy"></i> Save changes</button>
+              </div>
+            </form>
+          </div>`;
+        modal.classList.add('active');
+      };
+
+      App.closeStaffEdit = () => document.getElementById('staff-edit-modal')?.classList.remove('active');
+
+      App.saveStaffEdit = (event, staffId) => {
+        event.preventDefault();
+        const data = DataStore.get();
+        if (!App.canManageStaff(data.activeRole)) return;
+        const staff = (data.staff || []).find(employee => employee.id === staffId);
+        if (!staff) return;
+        staff.name = document.getElementById('staff-edit-name').value.trim();
+        staff.email = document.getElementById('staff-edit-email').value.trim();
+        staff.phone = document.getElementById('staff-edit-phone').value.trim();
+        staff.role = document.getElementById('staff-edit-role').value;
+        staff.status = document.getElementById('staff-edit-status').value;
+        staff.branch = document.getElementById('staff-edit-branch').value;
+        DataStore.save(data);
+        App.closeStaffEdit();
+        App.renderStaff();
+      };
+
+      const observer = new MutationObserver(addStaffEditButtons);
+      const start = () => {
+        const container = document.getElementById('staff-content');
+        if (!container) return;
+        observer.observe(container, { childList: true, subtree: true });
+        addStaffEditButtons();
+      };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+      else start();
+    })();
+  </script>
+</body>
+</html>
